@@ -1,61 +1,41 @@
 <?php
+use \humhub\modules\custom_pages\models\Page;
 
-use humhub\modules\custom_pages\models\CustomPage;
+$cssClass = ($page->hasAttribute('cssClass') && !empty($page->cssClass)) ? $page->cssClass : 'custom-pages-page';
+$margin = $navigationClass == Page::NAV_CLASS_TOPNAV ? -15 : 0;
 ?>
 
-<?php if ($navigationClass == CustomPage::NAV_CLASS_ACCOUNTNAV): ?>
+<style>
+    #iframepage {
+        border: none;
+        <?= $margin ? 'margin-top:'.$margin.'px;' : ''?>        
+        background: url('<?= Yii::$app->moduleManager->getModule('custom_pages')->getPublishedUrl('/loader.gif'); ?>') center center no-repeat;
+    }
+</style>
 
-    <iframe id="iframepage" style="width:100%; height: 400px;" src="<?php echo $url; ?>"></iframe>
+<iframe class="<?= $cssClass ?>" id="iframepage" style="width:100%;height: 100%" src="<?php echo $url; ?>"></iframe>    
 
-    <style>
-        #iframepage {
-            border: none;
-            background: url('<?php echo Yii::getAlias("@web/img/loader.gif"); ?>') center center no-repeat;
-        }
-    </style>
 
-    <script>
-        window.onload = function (evt) {
+<script>
+    function setSize() {
+        $('#iframepage').css( {
+            height: (window.innerHeight - $('#iframepage').position().top - 15) + 'px',
+            background: 'inherit'
+        });
+    }
+    
+    // execute setSize in the beginning, else dynamically loaded content in the 
+    // Iframe gets the wrong size to work with
+    setSize();
+
+    window.onresize = function (evt) {
+        setSize();
+    };
+
+    $(document).on('humhub:ready', function () {
+        $('#iframepage').on('load',function () {
             setSize();
-        }
-        window.onresize = function (evt) {
-            setSize();
-        }
+        });
+    });
 
-        function setSize() {
-
-            $('#iframepage').css('height', window.innerHeight - 170 + 'px');
-        }
-    </script>
-
-
-<?php else: ?>
-
-    <iframe id="iframepage" style="width:100%;height:400px" src="<?php echo $url; ?>"></iframe>
-
-    <style>
-        #iframepage {
-            position: absolute;
-            left: 0;
-            top: 98px;
-            border: none;
-            background: url('<?php echo Yii::getAlias("@web/img/loader.gif"); ?>') center center no-repeat;
-        }
-    </style>
-
-
-    <script>
-        window.onload = function (evt) {
-            setSize();
-        }
-        window.onresize = function (evt) {
-            setSize();
-        }
-
-        function setSize() {
-
-            $('#iframepage').css('height', window.innerHeight - 100 + 'px');
-            $('#iframepage').css('width', jQuery('body').outerWidth() - 1 + 'px');
-        }
-    </script>
-<?php endif; ?>
+</script>
