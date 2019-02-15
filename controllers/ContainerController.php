@@ -71,6 +71,8 @@ class ContainerController extends ContentContainerController
             return $this->render('markdown', array('page' => $page, 'md' => $page->page_content));
         } elseif ($page->type == Container::TYPE_TEMPLATE) {
             return $this->viewTemplatePage($page);
+        } elseif ($page->type == Container::TYPE_HTML) {
+            return $this->render('html', ['page' => $page, 'html' => $page->page_content, 'title' => $page->title]);
         } elseif ($page->type == Container::TYPE_PHP) {
             return $this->render('php', [
                 'page' => $page,

@@ -142,6 +142,7 @@ class ContainerPage extends ContentActiveRecord implements Searchable, CustomCon
             Container::TYPE_LINK,
             Container::TYPE_IFRAME,
             Container::TYPE_TEMPLATE,
+            Container::TYPE_HTML,
             Container::TYPE_PHP
         ];
     }
