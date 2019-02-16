@@ -122,7 +122,7 @@ class ContainerPage extends ContentActiveRecord implements Searchable, CustomCon
 		    case 'test':
 		    case 'full':
 			    $config = [
-					    'HTML.Allowed' => '*[style],*[class],div,p,br,b,strong,i,em,u,s,a[href|target],ul,li,ol,span,h1,h2,h3,h4,h5,h6,sub,sup,blockquote,pre,img[src|alt],iframe[frameborder|src],hr,font[size|color]',
+					    'HTML.Allowed' => '*[style],*[class],div,p,br,b,strong,i,em,u,s,a[href|target],ul,li,ol,span,h1,h2,h3,h4,h5,h6,sub,sup,blockquote,pre,img[src|alt],hr,font[size|color]',
 					    'CSS.Proprietary' => true,
 					    'CSS.AllowedProperties' => 'color,background-color,width,height,border-radius',
 			    ];
