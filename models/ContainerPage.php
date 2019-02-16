@@ -9,6 +9,8 @@ use humhub\modules\search\interfaces\Searchable;
 use humhub\modules\custom_pages\components\Container;
 use humhub\modules\custom_pages\modules\template\models\Template;
 use humhub\modules\custom_pages\models\CustomContentContainer;
+use yii\helpers\HtmlPurifier;
+
 /**
  * This is the model class for table "custom_pages_container_page".
  *
@@ -67,8 +69,82 @@ class ContainerPage extends ContentActiveRecord implements Searchable, CustomCon
     {
         $rules = $this->defaultRules();
         $rules[] = ['in_new_window', 'integer'];
-        $rules[] = [['page_content'], 'safe'];
+	    $rules[] = [['page_content'], 'safe', 'when' => array($this, 'isNotHtml')];
+	    $rules[] = [['page_content'], 'filter', 'when' => array($this, 'isHtml'), 'filter' => array($this, 'purifyFilter')];
+
         return $rules;
+    }
+
+	/**
+	 * @param ContainerPage $model the HTML code container
+	 * @return bool whether it is an html type container
+	 */
+	public function isHtml($model)
+	{
+		return $model->type == Container::TYPE_HTML;
+	}
+
+	/**
+	 * @param ContainerPage $model the HTML code
+	 * @return bool whether it is not an html type container
+	 */
+	public function isNotHtml($model)
+	{
+		return $model->type != Container::TYPE_HTML;
+	}
+
+	/**
+	 * Purify the HTML code only if its container type is html (conditional validation)
+	 *
+	 * @param string $html the HTML code to be purified
+	 * @return string the purified HTML code
+	 */
+    public function purifyFilter($html)
+    {
+	    return HtmlPurifier::process($html, $this->purifierConfig('test'));
+    }
+
+	/**
+	 * Returns HTMLPurifier configuration set.
+	 *
+	 * @param string $type set name
+	 * @return array configuration
+	 */
+    private function purifierConfig($type = '')
+    {
+	    // TODO: make workable safe config presets
+	    // test preset is only for testing
+	    // other presets will be discussed
+
+	    $config = [];
+
+	    switch ($type) {
+		    case 'test':
+		    case 'full':
+			    $config = [
+					    'HTML.Allowed' => '*[style],*[class],div,p,br,b,strong,i,em,u,s,a[href|target],ul,li,ol,span,h1,h2,h3,h4,h5,h6,sub,sup,blockquote,pre,img[src|alt],iframe[frameborder|src],hr,font[size|color]',
+					    'CSS.Proprietary' => true,
+					    'CSS.AllowedProperties' => 'color,background-color,width,height,border-radius',
+			    ];
+			    break;
+		    case 'minimal':
+			    $config = [
+					    'HTML.Allowed' => '*[style],*[class],p,br,b,strong,i,em,u,s,a[href|target],ul,li,ol,hr',
+					    'CSS.Proprietary' => true,
+					    'CSS.AllowedProperties' => 'color,background-color,width,height',
+			    ];
+			    break;
+		    case 'default':
+		    default:
+		    	$config = [
+					    'HTML.Allowed' => '*[style],*[class],p,br,b,strong,i,em,u,s,a[href|target],ul,li,ol,hr,h1,h2,h3,h4,h5,h6,span,pre,code,table,tr,td,th,blockquote,img[src|alt]',
+					    'CSS.Proprietary' => true,
+					    'CSS.AllowedProperties' => 'color,background-color,width,height',
+			    ];
+			    break;
+	    }
+
+	    return $config;
     }
 
     /**
