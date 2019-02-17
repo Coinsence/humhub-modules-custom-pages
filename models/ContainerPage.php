@@ -95,56 +95,19 @@ class ContainerPage extends ContentActiveRecord implements Searchable, CustomCon
 
 	/**
 	 * Purify the HTML code only if its container type is html (conditional validation)
+	 * Using a fixed config (see https://www.kalemzen.com.tr/htmlpurifier/configdoc/plain.html for the config documentation)
 	 *
 	 * @param string $html the HTML code to be purified
 	 * @return string the purified HTML code
 	 */
     public function purifyFilter($html)
     {
-	    return HtmlPurifier::process($html, $this->purifierConfig('test'));
-    }
-
-	/**
-	 * Returns HTMLPurifier configuration set.
-	 *
-	 * @param string $type set name
-	 * @return array configuration
-	 */
-    private function purifierConfig($type = '')
-    {
-	    // TODO: make workable safe config presets
-	    // test preset is only for testing
-	    // other presets will be discussed
-
-	    $config = [];
-
-	    switch ($type) {
-		    case 'test':
-		    case 'full':
-			    $config = [
-					    'HTML.Allowed' => '*[style],*[class],div,p,br,b,strong,i,em,u,s,a[href|target],ul,li,ol,span,h1,h2,h3,h4,h5,h6,sub,sup,blockquote,pre,img[src|alt],hr,font[size|color]',
-					    'CSS.Proprietary' => true,
-					    'CSS.AllowedProperties' => 'color,background-color,width,height,border-radius',
-			    ];
-			    break;
-		    case 'minimal':
-			    $config = [
-					    'HTML.Allowed' => '*[style],*[class],p,br,b,strong,i,em,u,s,a[href|target],ul,li,ol,hr',
-					    'CSS.Proprietary' => true,
-					    'CSS.AllowedProperties' => 'color,background-color,width,height',
-			    ];
-			    break;
-		    case 'default':
-		    default:
-		    	$config = [
-					    'HTML.Allowed' => '*[style],*[class],p,br,b,strong,i,em,u,s,a[href|target],ul,li,ol,hr,h1,h2,h3,h4,h5,h6,span,pre,code,table,tr,td,th,blockquote,img[src|alt]',
-					    'CSS.Proprietary' => true,
-					    'CSS.AllowedProperties' => 'color,background-color,width,height',
-			    ];
-			    break;
-	    }
-
-	    return $config;
+	    $purifierConfig = [
+			    'HTML.Allowed' => '*[style],*[class],div,p,br,b,strong,i,em,u,s,a[href|target],ul,li,ol,span,h1,h2,h3,h4,h5,h6,sub,sup,blockquote,pre,img[src|alt],hr,font[size|color]',
+			    'CSS.Proprietary' => true,
+			    'CSS.AllowedProperties' => 'color,background-color,width,height,border-radius',
+	    ];
+	    return HtmlPurifier::process($html, $purifierConfig);
     }
 
     /**
