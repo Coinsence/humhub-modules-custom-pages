@@ -97,7 +97,6 @@ class ContainerPage extends ContentActiveRecord implements Searchable, CustomCon
 	/**
 	 * strip the title from html tags
 	 * if all is stripped, the title will be "Unnamed_" + a random string, might find a better naming
-	 * Using a fixed config (see https://www.kalemzen.com.tr/htmlpurifier/configdoc/plain.html for the config documentation)
 	 *
 	 * @param string $title the Title to be stripped
 	 * @return string the stripped title
