@@ -69,6 +69,7 @@ class ContainerPage extends ContentActiveRecord implements Searchable, CustomCon
     {
         $rules = $this->defaultRules();
         $rules[] = ['in_new_window', 'integer'];
+	    $rules[] = [['title'], 'filter', 'filter' => array($this, 'stripTagsFilter')];
 	    $rules[] = [['page_content'], 'safe', 'when' => array($this, 'isNotHtml')];
 	    $rules[] = [['page_content'], 'filter', 'when' => array($this, 'isHtml'), 'filter' => array($this, 'purifyFilter')];
 
@@ -91,6 +92,24 @@ class ContainerPage extends ContentActiveRecord implements Searchable, CustomCon
 	public function isNotHtml($model)
 	{
 		return $model->type != Container::TYPE_HTML;
+	}
+
+	/**
+	 * strip the title from html tags
+	 * if all is stripped, the title will be "Unnamed_" + a random string, might find a better naming
+	 * Using a fixed config (see https://www.kalemzen.com.tr/htmlpurifier/configdoc/plain.html for the config documentation)
+	 *
+	 * @param string $title the Title to be stripped
+	 * @return string the stripped title
+	 * @throws \yii\base\Exception
+	 */
+	public function stripTagsFilter($title)
+	{
+		$strippedTitle = trim(strip_tags($title));
+		if ($strippedTitle == '') {
+			return 'Unnamed_'.Yii::$app->security->generateRandomString(6);
+		}
+		return $strippedTitle;
 	}
 
 	/**
