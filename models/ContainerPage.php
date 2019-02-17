@@ -69,7 +69,7 @@ class ContainerPage extends ContentActiveRecord implements Searchable, CustomCon
     {
         $rules = $this->defaultRules();
         $rules[] = ['in_new_window', 'integer'];
-	    $rules[] = [['title'], 'filter', 'filter' => array($this, 'stripTagsFilter')];
+	    $rules[] = [['title'], 'filter', 'filter' => array($this, 'reformatFilter')];
 	    $rules[] = [['page_content'], 'safe', 'when' => array($this, 'isNotHtml')];
 	    $rules[] = [['page_content'], 'filter', 'when' => array($this, 'isHtml'), 'filter' => array($this, 'purifyFilter')];
 
@@ -102,7 +102,7 @@ class ContainerPage extends ContentActiveRecord implements Searchable, CustomCon
 	 * @return string the stripped title
 	 * @throws \yii\base\Exception
 	 */
-	public function stripTagsFilter($title)
+	public function reformatFilter($title)
 	{
 		$strippedTitle = trim(strip_tags($title));
 		if ($strippedTitle == '') {
