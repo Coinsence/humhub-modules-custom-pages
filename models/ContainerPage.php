@@ -120,10 +120,11 @@ class ContainerPage extends ContentActiveRecord implements Searchable, CustomCon
 	 */
     public function purifyFilter($html)
     {
+	    $settings = new SettingsForm();
 	    $purifierConfig = [
-			    'HTML.Allowed' => '*[style],*[class],div,p,br,b,strong,i,em,u,s,a[href|target],ul,li,ol,span,h1,h2,h3,h4,h5,h6,sub,sup,blockquote,pre,img[src|alt],hr,font[size|color]',
+			    'HTML.Allowed' => $settings->htmlContainerPageAllowedHTML,
 			    'CSS.Proprietary' => true,
-			    'CSS.AllowedProperties' => 'color,background-color,width,height,border-radius',
+			    'CSS.AllowedProperties' => $settings->htmlContainerPageAllowedCSSProperties,
 	    ];
 	    return HtmlPurifier::process($html, $purifierConfig);
     }

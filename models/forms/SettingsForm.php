@@ -18,6 +18,8 @@ class SettingsForm extends Model
     const DEFAULT_VIEW_PATH_SNIPPETS = '@custom_pages/views/custom/global_snippets/';
     const DEFAULT_VIEW_PATH_CONTAINER_PAGES = '@custom_pages/views/custom/container_pages/';
     const DEFAULT_VIEW_PATH_CONTAINER_SNIPPETS = '@custom_pages/views/custom/container_snippets/';
+    const DEFAULT_ALLOWED_HTML = '*[style],*[class],div,p,br,b,strong,i,em,u,s,a[href|target],ul,li,ol,span,h1,h2,h3,h4,h5,h6,sub,sup,blockquote,pre,img[src|alt],hr,font[size|color]';
+    const DEFAULT_ALLOWED_CSS_PROPERTIES = 'color,background-color,width,height,border-radius';
 
     /**
      * @var integer
@@ -45,6 +47,16 @@ class SettingsForm extends Model
     public $phpContainerPagePath;
 
     /**
+     * @var string
+     */
+    public $htmlContainerPageAllowedHTML;
+
+    /**
+     * @var string
+     */
+    public $htmlContainerPageAllowedCSSProperties;
+
+    /**
      * @var \humhub\components\SettingsManager
      */
     public $settings;
@@ -60,6 +72,8 @@ class SettingsForm extends Model
         $this->phpGlobalSnippetPath = $this->settings->get('phpGlobalSnippetPath', static::DEFAULT_VIEW_PATH_SNIPPETS);
         $this->phpContainerPagePath = $this->settings->get('phpContainerPagePath', static::DEFAULT_VIEW_PATH_CONTAINER_PAGES);
         $this->phpContainerSnippetPath = $this->settings->get('phpContainerSnippetPath', static::DEFAULT_VIEW_PATH_CONTAINER_SNIPPETS);
+        $this->htmlContainerPageAllowedHTML = $this->settings->get('htmlContainerPageAllowedHTML', static::DEFAULT_ALLOWED_HTML);
+        $this->htmlContainerPageAllowedCSSProperties = $this->settings->get('htmlContainerPageAllowedCSSProperties', static::DEFAULT_ALLOWED_CSS_PROPERTIES);
     }
 
     /**
@@ -70,14 +84,67 @@ class SettingsForm extends Model
         return [
             ['phpPagesActive', 'integer'],
             [['phpGlobalPagePath', 'phpGlobalPagePath', 'phpGlobalSnippetPath', 'phpContainerSnippetPath', 'phpContainerPagePath'], 'validateViewPath'],
+            ['htmlContainerPageAllowedHTML', 'validateAllowedHTML'],
+            ['htmlContainerPageAllowedCSSProperties', 'validateAllowedCSSProperties'],
         ];
     }
 
+    /**
+     * Validates the view path.
+     *
+     * @param $attribute
+     * @param $params
+     */
     public function validateViewPath($attribute, $params)
     {
         if(!is_dir(Yii::getAlias($this->$attribute))) {
             $this->addError($attribute, Yii::t('CustomPagesModule.models_SettignsForm', 'The given view file path does not exist.'));
         }
+    }
+
+    /**
+     * Validates the allowed HTML.
+     *
+     * @param $attribute
+     * @param $params
+     */
+    public function validateAllowedHTML($attribute, $params)
+    {
+        $allowedHTMLRegExPattern = '/^(?:(?:\*|\w+)(?:\[\w+(?:\|\w+)*\])?,?)+$/';
+
+        $strippedAttribute = $this->stripAttribute($this->$attribute);
+        $isMatched = preg_match($allowedHTMLRegExPattern, $strippedAttribute, $output_array);
+        if(!$isMatched) {
+            $this->addError($attribute, Yii::t('CustomPagesModule.models_SettignsForm', 'The given whitelist is incorrect. please consider checking it carefully.'));
+        }
+    }
+
+    /**
+     * Validates the allowed CSS properties.
+     *
+     * @param $attribute
+     * @param $params
+     */
+    public function validateAllowedCSSProperties($attribute, $params)
+    {
+        $allowedCSSPropertiesRegExPattern = '/^(?:-?(?:\w+),?)+$/';
+
+        $strippedAttribute = $this->stripAttribute($this->$attribute);
+        $isMatched = preg_match($allowedCSSPropertiesRegExPattern, $strippedAttribute, $output_array);
+        if(!$isMatched) {
+            $this->addError($attribute, Yii::t('CustomPagesModule.models_SettignsForm', 'The given whitelist is incorrect. please consider checking it carefully.'));
+        }
+    }
+
+    /**
+     * Strip the attribute from whitespaces.
+     *
+     * @param $attribute
+     * @return string
+     */
+    public function stripAttribute($attribute)
+    {
+        return preg_replace('/\s/', '', $attribute);
     }
 
     /**
@@ -91,6 +158,8 @@ class SettingsForm extends Model
             'phpGlobalSnippetPath' => Yii::t('CustomPagesModule.models_SettignsForm','PHP view path for global custom snippets'),
             'phpContainerPagePath' => Yii::t('CustomPagesModule.models_SettignsForm','PHP view path for custom space pages'),
             'phpContainerSnippetPath' => Yii::t('CustomPagesModule.models_SettignsForm','PHP view path for custom space snippets'),
+            'htmlContainerPageAllowedHTML' => Yii::t('CustomPagesModule.models_SettignsForm','HTMLPurifier allowed HTML'),
+            'htmlContainerPageAllowedCSSProperties' => Yii::t('CustomPagesModule.models_SettignsForm','HTMLPurifier allowed CSS properties'),
         ];
     }
 
@@ -141,6 +210,20 @@ class SettingsForm extends Model
             $this->phpContainerSnippetPath = static::DEFAULT_VIEW_PATH_CONTAINER_SNIPPETS;
         } else {
             $this->settings->set('phpContainerSnippetPath', $this->phpContainerSnippetPath);
+        }
+
+        if(empty($this->htmlContainerPageAllowedHTML)) {
+            $this->settings->delete('htmlContainerPageAllowedHTML');
+            $this->htmlContainerPageAllowedHTML = static::DEFAULT_ALLOWED_HTML;
+        } else {
+            $this->settings->set('htmlContainerPageAllowedHTML', $this->stripAttribute($this->htmlContainerPageAllowedHTML));
+        }
+
+        if(empty($this->htmlContainerPageAllowedCSSProperties)) {
+            $this->settings->delete('htmlContainerPageAllowedCSSProperties');
+            $this->htmlContainerPageAllowedCSSProperties = static::DEFAULT_ALLOWED_CSS_PROPERTIES;
+        } else {
+            $this->settings->set('htmlContainerPageAllowedCSSProperties', $this->stripAttribute($this->htmlContainerPageAllowedCSSProperties));
         }
 
         return true;
