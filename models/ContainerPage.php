@@ -69,64 +69,64 @@ class ContainerPage extends ContentActiveRecord implements Searchable, CustomCon
     {
         $rules = $this->defaultRules();
         $rules[] = ['in_new_window', 'integer'];
-	    $rules[] = [['title'], 'filter', 'filter' => array($this, 'reformatFilter')];
-	    $rules[] = [['page_content'], 'safe', 'when' => array($this, 'isNotHtml')];
-	    $rules[] = [['page_content'], 'filter', 'when' => array($this, 'isHtml'), 'filter' => array($this, 'purifyFilter')];
+        $rules[] = [['title'], 'filter', 'filter' => array($this, 'reformatFilter')];
+        $rules[] = [['page_content'], 'safe', 'when' => array($this, 'isNotHtml')];
+        $rules[] = [['page_content'], 'filter', 'when' => array($this, 'isHtml'), 'filter' => array($this, 'purifyFilter')];
 
         return $rules;
     }
 
-	/**
-	 * @param ContainerPage $model the HTML code container
-	 * @return bool whether it is an html type container
-	 */
-	public function isHtml($model)
-	{
-		return $model->type == Container::TYPE_HTML;
-	}
+    /**
+     * @param ContainerPage $model the HTML code container
+     * @return bool whether it is an html type container
+     */
+    public function isHtml($model)
+    {
+        return $model->type == Container::TYPE_HTML;
+    }
 
-	/**
-	 * @param ContainerPage $model the HTML code
-	 * @return bool whether it is not an html type container
-	 */
-	public function isNotHtml($model)
-	{
-		return $model->type != Container::TYPE_HTML;
-	}
+    /**
+     * @param ContainerPage $model the HTML code
+     * @return bool whether it is not an html type container
+     */
+    public function isNotHtml($model)
+    {
+        return $model->type != Container::TYPE_HTML;
+    }
 
-	/**
-	 * strip the title from html tags
-	 * if all is stripped, the title will be "Unnamed_" + a random string, might find a better naming
-	 *
-	 * @param string $title the Title to be stripped
-	 * @return string the stripped title
-	 * @throws \yii\base\Exception
-	 */
-	public function reformatFilter($title)
-	{
-		$strippedTitle = trim(strip_tags($title));
-		if ($strippedTitle == '') {
-			return 'Unnamed_'.Yii::$app->security->generateRandomString(6);
-		}
-		return $strippedTitle;
-	}
+    /**
+     * strip the title from html tags
+     * if all is stripped, the title will be "Unnamed_" + a random string, might find a better naming
+     *
+     * @param string $title the Title to be stripped
+     * @return string the stripped title
+     * @throws \yii\base\Exception
+     */
+    public function reformatFilter($title)
+    {
+        $strippedTitle = trim(strip_tags($title));
+        if ($strippedTitle == '') {
+            return 'Unnamed_'.Yii::$app->security->generateRandomString(6);
+        }
+        return $strippedTitle;
+    }
 
-	/**
-	 * Purify the HTML code only if its container type is html (conditional validation)
-	 * Using a fixed config (see https://www.kalemzen.com.tr/htmlpurifier/configdoc/plain.html for the config documentation)
-	 *
-	 * @param string $html the HTML code to be purified
-	 * @return string the purified HTML code
-	 */
+    /**
+     * Purify the HTML code only if its container type is html (conditional validation)
+     * Using a fixed config (see https://www.kalemzen.com.tr/htmlpurifier/configdoc/plain.html for the config documentation)
+     *
+     * @param string $html the HTML code to be purified
+     * @return string the purified HTML code
+     */
     public function purifyFilter($html)
     {
-	    $settings = new SettingsForm();
-	    $purifierConfig = [
-			    'HTML.Allowed' => $settings->htmlContainerPageAllowedHTML,
-			    'CSS.Proprietary' => true,
-			    'CSS.AllowedProperties' => $settings->htmlContainerPageAllowedCSSProperties,
-	    ];
-	    return HtmlPurifier::process($html, $purifierConfig);
+        $settings = new SettingsForm();
+        $purifierConfig = [
+                'HTML.Allowed' => $settings->htmlContainerPageAllowedHTML,
+                'CSS.Proprietary' => true,
+                'CSS.AllowedProperties' => $settings->htmlContainerPageAllowedCSSProperties,
+        ];
+        return HtmlPurifier::process($html, $purifierConfig);
     }
 
     /**
