@@ -45,6 +45,10 @@ use yii\helpers\Html;
                     <?= Yii::t('CustomPagesModule.base', 'Please keep in mind that php based pages are vulnerable to security issues, especially when handling user input. For more information, please have a look at <a href="{url}">Yii\'s Security best practices</a>.', ['url' => 'http://www.yiiframework.com/doc-2.0/guide-security-best-practices.html']) ?>
                 </div>
             </div>
+            <div id="htmlPurifierSettings">
+                <?= $form->field($model, 'htmlContainerPageAllowedHTML'); ?>
+                <?= $form->field($model, 'htmlContainerPageAllowedCSSProperties'); ?>
+            </div>
 
         <hr>
 

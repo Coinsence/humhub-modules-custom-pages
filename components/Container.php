@@ -122,8 +122,8 @@ class Container extends Behavior
     public function validatePhpType($attribute, $params)
     {
         if($this->isType(self::TYPE_PHP)) {
-            $settigns = new SettingsForm();
-            if($this->owner->isNewRecord && !$settigns->phpPagesActive) {
+            $settings = new SettingsForm();
+            if($this->owner->isNewRecord && !$settings->phpPagesActive) {
                 throw new HttpException(403);
             }
 
